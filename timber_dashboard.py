@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -40,5 +41,12 @@ if uploaded_file is not None:
     # KPI Summary
     st.metric("📦 Total Volume (m³)", f"{filtered_data['Volume_m3'].sum():.2f}")
     st.metric("📄 Total Logs Tracked", len(filtered_data))
+
+    # Log Balance at Camp
+    st.subheader("📍 Log Balance at Logging Camp")
+    data['At_Camp'] = data['Destination'].str.lower().str.contains('camp')
+    camp_balance = data.groupby(['Region', 'At_Camp'])['Log_ID'].count().unstack(fill_value=0)
+    camp_balance['Logs_Remaining_At_Camp'] = camp_balance.get(True, 0)
+    st.dataframe(camp_balance[['Logs_Remaining_At_Camp']])
 else:
     st.warning("Please upload a CSV file to get started.")
