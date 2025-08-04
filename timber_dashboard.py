@@ -49,7 +49,6 @@ if uploaded_file is not None:
     route_pairs = []
 
     for _, row in moved_logs.iterrows():
-        # Simulate camp coordinates based on known region (for demo purpose)
         if "kapit" in row['Region'].lower():
             start_lat, start_lon = 2.016, 113.02
         elif "sibu" in row['Region'].lower():
@@ -59,7 +58,7 @@ if uploaded_file is not None:
         elif "kuching" in row['Region'].lower():
             start_lat, start_lon = 1.556, 110.35
         else:
-            start_lat, start_lon = row['Latitude'], row['Longitude']  # fallback
+            start_lat, start_lon = row['Latitude'], row['Longitude']
 
         route_pairs.append({
             "from_lat": start_lat,
@@ -122,5 +121,18 @@ if uploaded_file is not None:
         st.dataframe(overdue_logs[['Log_ID', 'Region', 'Species', 'Date', 'Days_At_Camp']])
     else:
         st.success("✅ No overdue logs at camp.")
+
+    # Anomaly Detection
+    st.subheader("🚨 Log Anomaly Detection")
+    if 'Anomaly_Score' in data.columns:
+        flagged_anomalies = data[data['Anomaly_Score'] > 0.7]
+        if not flagged_anomalies.empty:
+            st.error("⚠️ Logs with anomaly scores above 0.7 have been detected!")
+            st.dataframe(flagged_anomalies[['Log_ID', 'Region', 'Species', 'Anomaly_Score', 'License_No', 'Truck_ID']])
+        else:
+            st.success("✅ No anomalies detected above the threshold (0.7).")
+    else:
+        st.info("ℹ️ 'Anomaly_Score' column not found in your dataset.")
+
 else:
     st.warning("Please upload a CSV file to get started.")
